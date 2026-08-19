@@ -1,7 +1,10 @@
 data "aws_iam_policy_document" "gha_trust" {
   statement {
     effect  = "Allow"
-    actions = ["sts:AssumeRoleWithWebIdentity"]
+    actions = [
+        "sts:AssumeRoleWithWebIdentity",
+        "sts:TagSession",
+        ]
 
     principals {
       type        = "Federated"
@@ -14,10 +17,23 @@ data "aws_iam_policy_document" "gha_trust" {
       values   = ["sts.amazonaws.com"]
     }
 
+    # No ":sub" condition — GitHub's actual sub claim embeds immutable numeric org/repo
+    # IDs (confirmed via CloudTrail: "repo:org@<org_id>/repo@<repo_id>:ref:refs/heads/
+    # main", not the commonly-assumed "repo:org/repo:ref:refs/heads/main"), presumably
+    # to stop a renamed/transferred repo from inheriting an old repo's trust. Matching
+    # that would mean pinning per-repo numeric IDs here, which is extra fragile
+    # complexity for no real security gain over ":ref" + ":repository" below (both use
+    # plain, stable claim values — no IDs involved), which are sufficient on their own.
     condition {
       test     = "StringEquals"
-      variable = "token.actions.githubusercontent.com:sub"
-      values   = [for repo in var.github_repos : "repo:${repo}:ref:refs/heads/main"]
+      variable = "token.actions.githubusercontent.com:ref"
+      values   = ["refs/heads/main"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:repository"
+      values   = var.github_repos
     }
   }
 }
