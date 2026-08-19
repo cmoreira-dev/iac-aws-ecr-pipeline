@@ -17,13 +17,26 @@ data "aws_iam_policy_document" "gha_trust" {
       values   = ["sts.amazonaws.com"]
     }
 
-    # No ":sub" condition — GitHub's actual sub claim embeds immutable numeric org/repo
-    # IDs (confirmed via CloudTrail: "repo:org@<org_id>/repo@<repo_id>:ref:refs/heads/
-    # main", not the commonly-assumed "repo:org/repo:ref:refs/heads/main"), presumably
-    # to stop a renamed/transferred repo from inheriting an old repo's trust. Matching
-    # that would mean pinning per-repo numeric IDs here, which is extra fragile
-    # complexity for no real security gain over ":ref" + ":repository" below (both use
-    # plain, stable claim values — no IDs involved), which are sufficient on their own.
+    # AWS hard-requires a trust policy on this provider to evaluate ":sub" or
+    # ":job_workflow_ref" scoped to something other than "*" (rejects
+    # UpdateAssumeRolePolicy otherwise, even with ":ref"/":repository" below already
+    # doing the real restricting) — so ":sub" can't just be dropped. GitHub's actual sub
+    # claim embeds immutable numeric org/repo IDs (confirmed via CloudTrail:
+    # "repo:org@<org_id>/repo@<repo_id>:ref:refs/heads/main", not the commonly-assumed
+    # "repo:org/repo:ref:refs/heads/main"), presumably to stop a renamed/transferred
+    # repo from inheriting an old repo's trust — pinning those IDs here would be fragile
+    # (they're not knowable from `var.github_repos` alone, and change if a repo is ever
+    # recreated), so StringLike + wildcards over just the ID segments satisfies AWS's
+    # requirement without depending on them.
+    condition {
+      test     = "StringLike"
+      variable = "token.actions.githubusercontent.com:sub"
+      values = [
+        for repo in var.github_repos :
+        "repo:${split("/", repo)[0]}@*/${split("/", repo)[1]}@*:ref:refs/heads/main"
+      ]
+    }
+
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:ref"
