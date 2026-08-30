@@ -4,8 +4,8 @@ output "role_arn" {
 }
 
 output "oidc_provider_arn" {
-  description = "ARN do OIDC provider do GitHub Actions"
-  value       = aws_iam_openid_connect_provider.github_actions.arn
+  description = "ARN do OIDC provider do GitHub Actions (criado pelo bootstrap, aqui só lido)"
+  value       = data.aws_iam_openid_connect_provider.github_actions.arn
 }
 
 output "ecr_products" {
