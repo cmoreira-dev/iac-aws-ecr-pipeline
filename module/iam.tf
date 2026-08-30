@@ -17,27 +17,31 @@ data "aws_iam_policy_document" "gha_trust" {
       values   = ["sts.amazonaws.com"]
     }
 
-    # AWS requires a `sub` (or `job_workflow_ref`) condition that isn't scoped to
-    # a bare "*". This org does NOT use immutable identifiers — `sub` is the plain
-    # documented form `repo:<owner>/<repo>:<context>` (verified from a live token
-    # 2026-08-30; the earlier "@<id>" pattern here never matched). The real pins
-    # are `repository` + `ref` below; `repo:<repo>:*` just satisfies AWS.
+    # AWS requires a `sub` (or `job_workflow_ref`) condition not scoped to a bare
+    # "*". The callers invoke this via a REUSABLE workflow
+    # (cmoreira-dev/.github/.github/workflows/build-push-ecr.yml), and GitHub emits
+    # the *immutable* `sub` form for reusable-workflow jobs — verified from a live
+    # token 2026-08-30:
+    #   repo:cmoreira-dev@<org_id>/api.ia.local-sara@<repo_id>:ref:refs/heads/main
+    # The numeric IDs aren't knowable from var.github_repos, so wildcard them; the
+    # real pins are `repository` + `ref` below.
+    # (Direct, non-reusable workflows in this org get the plain
+    # `repo:<owner>/<repo>:<context>` form — so a role assumed from a plain
+    # workflow would need a different pattern.)
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
       values = [
-        for repo in var.github_repos : "repo:${repo}:*"
+        for repo in var.github_repos :
+        "repo:${split("/", repo)[0]}@*/${split("/", repo)[1]}@*:ref:refs/heads/main"
       ]
     }
 
-    # Optional tightening: also require the build go through the shared reusable
-    # workflow. Enable once its job_workflow_ref format is confirmed for a
-    # reusable-workflow call.
-    # condition {
-    #   test     = "StringLike"
-    #   variable = "token.actions.githubusercontent.com:job_workflow_ref"
-    #   values   = ["cmoreira-dev/.github/.github/workflows/build-push-ecr.yml@*"]
-    # }
+    condition {
+      test     = "StringLike"
+      variable = "token.actions.githubusercontent.com:job_workflow_ref"
+      values   = ["cmoreira-dev/.github/.github/workflows/build-push-ecr.yml@*"]
+    }
 
     condition {
       test     = "StringEquals"
