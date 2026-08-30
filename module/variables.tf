@@ -31,12 +31,6 @@ variable "ecr_scan_type" {
   default     = "BASIC"
 }
 
-variable "github_oidc_thumbprint" {
-  description = "Thumbprint do certificado do OIDC provider do GitHub Actions (token.actions.githubusercontent.com)"
-  type        = string
-  default     = "6938fd4d98bab03faadb97b34396831e3780aea1"
-}
-
 variable "iam_role_name" {
   description = "Nome da IAM role assumida pelo GitHub Actions via OIDC"
   type        = string
