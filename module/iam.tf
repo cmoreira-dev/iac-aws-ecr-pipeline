@@ -19,22 +19,27 @@ data "aws_iam_policy_document" "gha_trust" {
 
     # AWS requires a `sub` (or `job_workflow_ref`) condition not scoped to a bare
     # "*". The callers invoke this via a REUSABLE workflow
-    # (cmoreira-dev/.github/.github/workflows/build-push-ecr.yml), and GitHub emits
-    # the *immutable* `sub` form for reusable-workflow jobs — verified from a live
-    # token 2026-08-30:
-    #   repo:cmoreira-dev@<org_id>/api.ia.local-sara@<repo_id>:ref:refs/heads/main
-    # The numeric IDs aren't knowable from var.github_repos, so wildcard them; the
-    # real pins are `repository` + `ref` below.
-    # (Direct, non-reusable workflows in this org get the plain
-    # `repo:<owner>/<repo>:<context>` form — so a role assumed from a plain
-    # workflow would need a different pattern.)
+    # (cmoreira-dev/.github/.github/workflows/build-push-ecr.yml). A prior fix
+    # here assumed GitHub *always* emits the immutable `sub` form
+    # (repo:cmoreira-dev@<org_id>/<repo>@<repo_id>:ref:refs/heads/main) for
+    # reusable-workflow jobs, based on a token verified from api.ia.local-sara
+    # on 2026-08-30. That assumption was wrong: verified 2026-09-14 that
+    # backstage.homelab gets the *plain* form
+    # (repo:cmoreira-dev/backstage.homelab:ref:refs/heads/main) even for a true
+    # cross-repo reusable-workflow call — the immutable-vs-plain choice isn't
+    # determined solely by "reusable workflow or not", so accept both forms per
+    # repo instead of re-litigating which repos get which. The real pins are
+    # `repository` + `ref` below.
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values = [
-        for repo in var.github_repos :
-        "repo:${split("/", repo)[0]}@*/${split("/", repo)[1]}@*:ref:refs/heads/main"
-      ]
+      values = concat(
+        [for repo in var.github_repos : "repo:${repo}:ref:refs/heads/main"],
+        [
+          for repo in var.github_repos :
+          "repo:${split("/", repo)[0]}@*/${split("/", repo)[1]}@*:ref:refs/heads/main"
+        ],
+      )
     }
 
     condition {
