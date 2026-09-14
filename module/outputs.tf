@@ -1,14 +1,14 @@
 output "role_arn" {
-  description = "ARN da role assumida pelo GitHub Actions via OIDC — usar como AWS_ROLE_ARN nas Variables do GitHub"
+  description = "ARN of the role assumed by GitHub Actions via OIDC — set as AWS_ROLE_ARN in GitHub Variables"
   value       = aws_iam_role.gha_ecr_push.arn
 }
 
 output "oidc_provider_arn" {
-  description = "ARN do OIDC provider do GitHub Actions (criado pelo bootstrap, aqui só lido)"
+  description = "ARN of the GitHub Actions OIDC provider (created by bootstrap, only looked up here)"
   value       = data.aws_iam_openid_connect_provider.github_actions.arn
 }
 
 output "ecr_products" {
-  description = "Prefixos de produto configurados com create-on-push"
+  description = "Product prefixes configured with create-on-push"
   value       = var.ecr_products
 }

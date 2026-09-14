@@ -1,38 +1,38 @@
 variable "aws_region" {
-  description = "Região AWS onde os recursos serão criados"
+  description = "AWS region where the resources will be created"
   type        = string
 }
 
 variable "ecr_products" {
-  description = "Prefixos de produto no ECR (pastas). Cada um vira um repository creation template com CREATE_ON_PUSH — componentes (api, ui, ...) sob o prefixo são criados automaticamente no primeiro push, sem passar por Terraform."
+  description = "Product prefixes in ECR (folders). Each one becomes a repository creation template with CREATE_ON_PUSH — components (api, ui, ...) under the prefix are created automatically on first push, without going through Terraform."
   type        = list(string)
 }
 
 variable "github_repos" {
-  description = "Repos do GitHub (\"org/repo\") autorizados a assumir a role de push via OIDC, restritos à branch main."
+  description = "GitHub repos (\"org/repo\") authorized to assume the push role via OIDC, restricted to the main branch."
   type        = list(string)
 }
 
 variable "image_tag_mutability" {
-  description = "Tag mutability aplicada aos repositórios criados via template"
+  description = "Tag mutability applied to repositories created via template"
   type        = string
   default     = "IMMUTABLE"
 }
 
 variable "lifecycle_untagged_expire_days" {
-  description = "Dias até expirar imagens sem tag nos repositórios criados via template"
+  description = "Days until untagged images expire in repositories created via template"
   type        = number
   default     = 14
 }
 
 variable "ecr_scan_type" {
-  description = "Tipo de scan de vulnerabilidade do registro (\"BASIC\" ou \"ENHANCED\")"
+  description = "Registry vulnerability scan type (\"BASIC\" or \"ENHANCED\")"
   type        = string
   default     = "BASIC"
 }
 
 variable "iam_role_name" {
-  description = "Nome da IAM role assumida pelo GitHub Actions via OIDC"
+  description = "Name of the IAM role assumed by GitHub Actions via OIDC"
   type        = string
   default     = "gha-cmoreira-dev-ecr-push"
 }

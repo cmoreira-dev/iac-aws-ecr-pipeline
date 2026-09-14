@@ -2,7 +2,7 @@ resource "aws_ecr_repository_creation_template" "product" {
   for_each = toset(var.ecr_products)
 
   prefix               = each.value
-  description          = "Create-on-push pro produto ${each.value}"
+  description          = "Create-on-push for product ${each.value}"
   image_tag_mutability = var.image_tag_mutability
   applied_for          = ["CREATE_ON_PUSH"]
 
