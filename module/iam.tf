@@ -73,12 +73,12 @@ data "aws_iam_policy_document" "ecr_push" {
       "ecr:InitiateLayerUpload",
       "ecr:UploadLayerPart",
       "ecr:CompleteLayerUpload",
-      "ecr:CreateRepository", # necessário pro create-on-push (ver Pendências no README)
+      "ecr:CreateRepository", # required for create-on-push (see Pending items in README)
     ]
 
-    # wildcard por produto, não lista exata de repo — é assim que um
-    # componente novo (ex: "padel-movement/worker") ganha permissão de push
-    # sem precisar de nenhuma mudança neste módulo.
+    # wildcard per product, not an exact repo list — this is how a new
+    # component (e.g. "padel-movement/worker") gets push permission without
+    # needing any change to this module.
     resources = [
       for p in var.ecr_products :
       "arn:aws:ecr:${var.aws_region}:${data.aws_caller_identity.current.account_id}:repository/${p}/*"
@@ -88,7 +88,7 @@ data "aws_iam_policy_document" "ecr_push" {
   statement {
     effect    = "Allow"
     actions   = ["ecr:GetAuthorizationToken"]
-    resources = ["*"] # exigido pela API do ECR, não dá pra restringir por recurso
+    resources = ["*"] # required by the ECR API, can't be scoped to a resource
   }
 }
 
