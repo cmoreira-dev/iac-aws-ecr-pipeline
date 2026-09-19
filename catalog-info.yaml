@@ -1,0 +1,16 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: iac-aws-ecr-pipeline
+  description: >-
+    Reusable Terraform module for the Docker image build & push pipeline to
+    AWS ECR via GitHub Actions — ECR create-on-push templates, registry
+    scanning, and the OIDC/IAM role that lets GitHub Actions push images
+    without static AWS credentials.
+  annotations:
+    github.com/project-slug: cmoreira-dev/iac-aws-ecr-pipeline
+spec:
+  type: library
+  owner: platform-team
+  system: homelab-platform
+  lifecycle: production
