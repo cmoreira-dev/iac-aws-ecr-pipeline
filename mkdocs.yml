@@ -1,0 +1,8 @@
+site_name: 'iac-aws-ecr-pipeline'
+site_description: 'Reusable Terraform module for the Docker image build & push pipeline to AWS ECR via GitHub Actions'
+
+nav:
+  - Home: index.md
+
+plugins:
+  - techdocs-core
