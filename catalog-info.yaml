@@ -9,6 +9,7 @@ metadata:
     without static AWS credentials.
   annotations:
     github.com/project-slug: cmoreira-dev/iac-aws-ecr-pipeline
+    backstage.io/techdocs-ref: dir:.
 spec:
   type: library
   owner: platform-team
