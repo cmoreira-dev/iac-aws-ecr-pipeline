@@ -22,10 +22,10 @@ data "aws_iam_policy_document" "gha_trust" {
     # (cmoreira-dev/.github/.github/workflows/build-push-ecr.yml). A prior fix
     # here assumed GitHub *always* emits the immutable `sub` form
     # (repo:cmoreira-dev@<org_id>/<repo>@<repo_id>:ref:refs/heads/main) for
-    # reusable-workflow jobs, based on a token verified from api.ia.local-sara
+    # reusable-workflow jobs, based on a token verified from <app-repo>
     # on 2026-08-30. That assumption was wrong: verified 2026-09-14 that
-    # backstage.homelab gets the *plain* form
-    # (repo:cmoreira-dev/backstage.homelab:ref:refs/heads/main) even for a true
+    # <other-repo> gets the *plain* form
+    # (repo:<org>/<other-repo>:ref:refs/heads/main) even for a true
     # cross-repo reusable-workflow call — the immutable-vs-plain choice isn't
     # determined solely by "reusable workflow or not", so accept both forms per
     # repo instead of re-litigating which repos get which. The real pins are
@@ -82,7 +82,7 @@ data "aws_iam_policy_document" "ecr_push" {
     ]
 
     # wildcard per product, not an exact repo list — this is how a new
-    # component (e.g. "padel-movement/worker") gets push permission without
+    # component (e.g. "app-a/worker") gets push permission without
     # needing any change to this module.
     resources = [
       for p in var.ecr_products :
