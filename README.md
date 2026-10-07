@@ -17,7 +17,7 @@ not specific to one repo/product. Creates:
 
 Decision details (why OIDC instead of access keys, why create-on-push
 instead of a repo per component, why not Crossplane) are in
-`TODO-ecr-pipeline.md` at the root of the `cmoreira-dev` workspace.
+the project's design notes.
 
 ## Requirements
 
@@ -30,10 +30,10 @@ this in `providers.tf` (`>= 6.28.0, < 7.0.0`). Validated with `tofu init` +
 ## Usage
 
 This module is meant to be consumed via Terragrunt from
-`infra-as-code/iac.homelab-live-infra`, pointing `source` at this repo:
+`<live-infra-repo>`, pointing `source` at this repo:
 
 ```hcl
-# iac.homelab-live-infra/ecr-pipeline/terragrunt.hcl (example — not created yet)
+# <live-infra-repo>/ecr-pipeline/terragrunt.hcl (example — not created yet)
 include "root" {
   path = find_in_parent_folders("terragrunt.hcl")
 }
@@ -43,11 +43,11 @@ terraform {
 }
 
 inputs = {
-  ecr_products = ["padel-movement"]
+  ecr_products = ["app-a"]
 
   github_repos = [
-    "cmoreira-dev/api.ia.padel-movement-analysis",
-    "cmoreira-dev/ui.ia.padel-movement-analysis",
+    "<org>/<app-a-api>",
+    "<org>/<app-a-ui>",
   ]
 }
 ```
