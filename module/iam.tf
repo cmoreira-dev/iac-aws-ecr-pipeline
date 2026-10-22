@@ -1,3 +1,7 @@
+locals {
+  github_orgs = distinct([for repo in var.github_repos : split("/", repo)[0]])
+}
+
 data "aws_iam_policy_document" "gha_trust" {
   statement {
     effect = "Allow"
@@ -30,15 +34,17 @@ data "aws_iam_policy_document" "gha_trust" {
     # determined solely by "reusable workflow or not", so accept both forms per
     # repo instead of re-litigating which repos get which. The real pins are
     # `repository` + `ref` below.
+    #
+    # The `sub` patterns are per ORG, not per repo: listing every repo twice (plain and
+    # immutable) grew the trust policy by ~200 bytes per repo and hit IAM's 2048-byte
+    # ACLSizePerRole quota at ten repos. The `repository` allowlist below is a signed claim,
+    # so the wildcard here does not widen who can assume the role.
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
       values = concat(
-        [for repo in var.github_repos : "repo:${repo}:ref:refs/heads/main"],
-        [
-          for repo in var.github_repos :
-          "repo:${split("/", repo)[0]}@*/${split("/", repo)[1]}@*:ref:refs/heads/main"
-        ],
+        [for org in local.github_orgs : "repo:${org}/*:ref:refs/heads/main"],
+        [for org in local.github_orgs : "repo:${org}@*/*@*:ref:refs/heads/main"],
       )
     }
 
