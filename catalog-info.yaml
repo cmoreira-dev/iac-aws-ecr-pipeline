@@ -8,7 +8,6 @@ metadata:
     scanning, and the OIDC/IAM role that lets GitHub Actions push images
     without static AWS credentials.
   annotations:
-    github.com/project-slug: cmoreira-dev/iac-aws-ecr-pipeline
     backstage.io/techdocs-ref: dir:.
 spec:
   type: library
